@@ -4,6 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = "change this to be a more random key"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://lab5:Password123@localhost/lab5"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True 
 
 db = SQLAlchemy(app)
 
