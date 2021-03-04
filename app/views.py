@@ -58,6 +58,13 @@ def login():
     return render_template("login.html", form=form)
 
 
+
+@app.route('/secure-page')
+@login_required
+def secure_page():
+    return render_template("secure_page.html")
+
+
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
 @login_manager.user_loader
