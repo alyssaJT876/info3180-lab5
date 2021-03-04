@@ -10,6 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from app.forms import LoginForm
 from app.models import UserProfile
+from werkzeug.security import check_password_hash
 
 
 ###
@@ -34,20 +35,26 @@ def login():
     if request.method == "POST":
         # change this to actually validate the entire form submission
         # and not just one field
-        if form.username.data:
+        if form.validate_on_submit():
             # Get the username and password values from the form.
-
+            username = form.username.data
+            password = form.password.data
             # using your model, query database for a user based on the username
             # and password submitted. Remember you need to compare the password hash.
             # You will need to import the appropriate function to do so.
             # Then store the result of that query to a `user` variable so it can be
             # passed to the login_user() method below.
-
+            user = UserProfile.query.filter_by(username = username).first()
+            if user is not None:
+                if check_password_hash(user.password, password):
             # get user id, load into session
-            login_user(user)
-
-            # remember to flash a message to the user
-            return redirect(url_for("home"))  # they should be redirected to a secure-page route instead
+                    login_user(user)
+                    # remember to flash a message to the user
+                    flash("Login Successful", "success")
+                    return redirect(url_for("secure_page"))  # they should be redirected to a secure-page route instead
+            else:
+                flash("Username or Password input incorrect", "damger")
+    flash_errors(form)
     return render_template("login.html", form=form)
 
 
@@ -84,6 +91,15 @@ def add_header(response):
 def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
+
+
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'danger')
 
 
 if __name__ == '__main__':
